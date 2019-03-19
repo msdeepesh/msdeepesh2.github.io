@@ -11,6 +11,9 @@
         }
     </style>
     <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <link href='style.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,500,700,800,900" rel="stylesheet">
+
 </head>
 <body>
 
@@ -35,15 +38,9 @@
             <h1>Dee News Channel</h1>
             <br />
             <div id="latest_date"></div>
-            <table class="table table-bordered table-striped" border="1" id="employee_table">
-                <tr>
-                    <th style="display: none;">Id</th>
-                    <th>Source</th>
-                    <th>Date</th>
-                    <th>News</th>
-                    <th>Action</th>
-                </tr>
-            </table>
+            <div class="table table-bordered table-striped" border="1" id="employee_table">
+
+            </div>
         </div>
     </div>
 
@@ -139,17 +136,15 @@
                             + new Date(value.created_at).getMinutes() + ":"
                             + new Date(value.created_at).getSeconds();
 
-                        employee_data += '<tr>';
-                        employee_data += '<td style="display: none;">' + value.id + '</td>';
-                        employee_data += '<td>' + value.user.screen_name + '</td>';
-                        employee_data += '<td>' + datetime1 + '</td>';
-                        if (value.entities != 'undefined' && value.entities.urls != undefined && value.entities.urls[0] != undefined)
-                            employee_data += '<td>' + '<a href="' + value.entities.urls[0].url + '"target="_blank">' + value.full_text + '</a>' + '</td>';
-                        else
-                            employee_data += '<td>' + value.full_text + '</td>';
-                        employee_data += '<td>' + '<input id="btn_remove" class="btnDelete" type="button" value="Remove" />' + '</td>';
+                        employee_data += '<div class="ms-news-item">';
+                        employee_data += '<div class="ms-channel-name">' + value.user.screen_name + '</div>';
+                        employee_data += '<div class="ms-datetime">' + datetime1 + '</div>';
+                        employee_data += '<div class="ms-full-text">' + value.full_text + '</div>';
+                        if (value.entities && value.entities.urls && value.entities.urls.length)
+                            employee_data += '<div class="ms-link">' + '<a href="' + value.entities.urls[0].url + '"target="_blank">' +  'Read More' + '</a>' + '</div>';
                         
-                        employee_data += '</tr>';
+                        employee_data += '<div class="ms-button">' + '<input id="btn_remove" class="btnDelete" type="button" value="Remove" />' + '</div>';
+                        employee_data += '</div>';
                     });
 
                     if (!SourceDone) {

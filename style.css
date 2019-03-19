@@ -1,0 +1,39 @@
+body {
+    font-family: 'Raleway', sans-serif;
+    background-color: #ececec;
+}
+
+#employee_table .ms-news-item {
+    padding: 10px;
+    border: 2px solid lightgray;
+    margin: 10px 5px;
+    border-radius: 8px;
+    background-color: white;
+}
+
+#employee_table .ms-news-item .ms-channel-name{
+    font-size: 18px;
+    font-weight: 600;
+    color: grey;
+}
+
+#employee_table .ms-news-item .ms-datetime{
+    font-size: 12px;
+    color: grey;
+    padding-bottom: 10px;
+    border-bottom: 1px solid lightgray;
+}
+
+#employee_table .ms-news-item .ms-link{
+    padding-bottom: 10px;
+    font-size: 14px;
+}
+
+#employee_table .ms-news-item .ms-full-text{
+    padding: 12px 0;
+    font-size: 14px;
+}
+
+#employee_table .ms-news-item .ms-button input{
+    cursor: pointer;
+}
