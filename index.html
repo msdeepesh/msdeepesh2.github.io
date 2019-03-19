@@ -1,15 +1,234 @@
-<!DOCTYPE html>
 
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>  
+
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title></title>
+    <meta charset="utf-8">
+    <title>jQuery.getJSON demo</title>
+    <style>
+        img {
+            height: 100px;
+            float: left;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 </head>
 <body>
-Hello Deepesh
- <script>
-    alert( 'Hello, world!' );
-  </script>
 
+    <form action="">
+       
+        <table id="form_action_buttons">
+            
+        <tr><td>Source:   <select id="Source" name="Source" multiple>  </select></td></tr>
+        <tr><td><input type="button" id="Clear" name="Clear" value="Clear" /></td></tr>
+        <tr><td>From:  <input type="text" id="From" name="From" value=""></td>
+        <td>To: <input type="text" id="To" name="To"  value=""></td>
+        <td>Time: <input type="text" id="Time1" name="Time1"  value=""></td>
+        <td>Keyword: <input type="text" id="KWord" name="KWord"  value=""></td>
+        </tr>
+        <tr>
+           <td> <input type="button" id="Filter" name="Filter" value="Filter" /></td>
+<%--        <td><input type="submit" id="Submit" name="Submit" value="Submit" /></td>--%>
+            </tr>
+</table>
+    <div class="container">
+        <div class="table-responsive">
+            <h1>Dee News Channel</h1>
+            <br />
+            <div id="latest_date"></div>
+            <table class="table table-bordered table-striped" border="1" id="employee_table">
+                <tr>
+                    <th style="display: none;">Id</th>
+                    <th>Source</th>
+                    <th>Date</th>
+                    <th>News</th>
+                    <th>Action</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        var date = new Date();
+        var GMTdate = date.toUTCString();
+        var dateString;
+        var item = {};
+        var ctr = 0;
+        var sourceObj = [];
+        var sourceSelObj = [];
+        var jsonId;
+        var SourceDone = false;
+
+        function sortJsonResults(a, b) {
+            var date1 = new Date(a.created_at);
+            var date2 = new Date(b.created_at);
+            //return a.created_at < b.created_at ? 1 : -1;
+            return date1 < date2 ? 1 : -1;
+        };
+
+        $("#Filter").click(function () {
+            var selectOption = $("#Source").find(":selected");
+            sourceSelObj.length = 0;
+            dateString = '';
+            var jsonDelObj = [];
+            //ReadDeletedIds();
+            selectOption.each(function (e) {                
+                sourceSelObj.push($(this).text());
+            });
+
+            var fromDate = $('#From').val();
+            var time1 = $('#Time1').val();
+            var kWord = $('#KWord').val();
+            $('#employee_table').empty();
+            ctr = 0;
+
+            $.getJSON("DeeNews5.txt")
+                .done(function (data) {
+                    var employee_data = '';
+                    data = $(data).sort(sortJsonResults);
+                    $.each(data, function (i, value) { 
+
+                      //Get Source values
+                        if ((jQuery.inArray(value.user.screen_name.toLowerCase(), sourceObj) < 0) && (!SourceDone)) {
+                            sourceObj.push(value.user.screen_name.toLowerCase());
+                        }
+
+                        if ((kWord.length > 0) && (value.full_text.toLowerCase().indexOf(kWord) < 0))
+                            return true;
+
+                        if ((sourceSelObj.length > 0) && (jQuery.inArray(value.user.screen_name.toLowerCase(), sourceSelObj) < 0))
+                            return true;
+
+                        if ((fromDate == '' || fromDate == null) && (time1 != '') && (time1 != null)) {
+                            fromDate = new Date(GMTdate).setMinutes(new Date(GMTdate).getMinutes() - time1)
+                        }
+
+                        if (new Date(value.created_at) < new Date(fromDate) && fromDate != '' && fromDate != null)
+                            return true;
+
+                        if ((jsonDelObj.length > 0) && (jQuery.inArray(value.id.toString(), jsonDelObj) >= 0))
+                            return true;
+
+                        //Get max date of news fetched
+                        if (dateString == null || dateString == '')
+                            dateString = value.created_at;
+                        else {
+                            if (new Date(value.created_at) > new Date(dateString))
+                                dateString = value.created_at;
+                        }
+
+
+                        ctr++;
+
+                        var month = new Array();
+                        month[0] = "January";
+                        month[1] = "February";
+                        month[2] = "March";
+                        month[3] = "April";
+                        month[4] = "May";
+                        month[5] = "June";
+                        month[6] = "July";
+                        month[7] = "August";
+                        month[8] = "September";
+                        month[9] = "October";
+                        month[10] = "November";
+                        month[11] = "December";
+                        var datetime1 = new Date(value.created_at).getDate() + "-"
+                            + month[new Date(value.created_at).getMonth()] + "-"
+                            + new Date(value.created_at).getFullYear() + " "
+                            + new Date(value.created_at).getHours() + ":"
+                            + new Date(value.created_at).getMinutes() + ":"
+                            + new Date(value.created_at).getSeconds();
+
+                        employee_data += '<tr>';
+                        employee_data += '<td style="display: none;">' + value.id + '</td>';
+                        employee_data += '<td>' + value.user.screen_name + '</td>';
+                        employee_data += '<td>' + datetime1 + '</td>';
+                        if (value.entities != 'undefined' && value.entities.urls != undefined && value.entities.urls[0] != undefined)
+                            employee_data += '<td>' + '<a href="' + value.entities.urls[0].url + '"target="_blank">' + value.full_text + '</a>' + '</td>';
+                        else
+                            employee_data += '<td>' + value.full_text + '</td>';
+                        employee_data += '<td>' + '<input id="btn_remove" class="btnDelete" type="button" value="Remove" />' + '</td>';
+                        
+                        employee_data += '</tr>';
+                    });
+
+                    if (!SourceDone) {
+                        sourceObj.sort();
+                        $.each(sourceObj, function (val, text) {
+                            $('#Source').append($('<option>', {
+                                value: val,
+                                text: text
+                            }))
+                        });
+                        date = new Date(dateString);
+                        $('#latest_date').append(dateString + '||' + date.toString() + '||' + ctr);
+                        SourceDone = true;
+                    }
+
+                    $('#employee_table').append(employee_data);
+                     
+                    $("tr:even").css("background-color", "#eeeeee");
+                    $("tr:odd").css("background-color", "#ffffff");
+
+                    $("#employee_table").on('click', '.btnDelete', function () {
+                        $(this).closest('tr').remove();
+                        jsonId = $(this).closest('tr').find('td:eq(0)').text();
+                        //if (jQuery.inArray(jsonId.toString(), jsonDelObj) < 0) {
+                          //  PostDeletedId(jsonId.toString());
+                        //}
+                        //ReadDeletedIds();
+                    });
+                });
+        });
+
+        $(document).ready(function () {
+            $("#Filter").trigger("click");            
+        });
+
+        $("#Source").change(function () {
+            SourceDone = true;           
+          $("#Filter").trigger("click");
+        });
+
+        $("#Clear").click(function () {
+            $('#Source').val('');
+            SourceDone = true;
+            $("#Filter").trigger("click");
+        });
+
+        function ReadDeletedIds() {
+            $.ajax({
+                type: "GET",
+                url: "DeeNews1.aspx/ReadDeletedIds",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    jsonDelObj.push(response.d);
+                },
+                failure: function (response) {
+                    alert(response.d);
+                }
+            });
+        }
+
+        function PostDeletedId(delIdString) {
+            $.ajax({
+                type: "POST",
+                url: "DeeNews1.aspx/PostDeletedId",
+                data: '{delIdString: "'+ delIdString + '" }',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    jsonDelObj = response.d;
+                },
+                failure: function (response) {
+                    alert(response.d);
+                }
+            });
+        }
+    </script>
+
+            </form>
 </body>
 </html>
